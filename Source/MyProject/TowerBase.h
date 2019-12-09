@@ -2,7 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Engine.h"
+#include "DrawDebugHelpers.h"
+#include "EngineGlobals.h"
+#include "Engine/EngineTypes.h"
+#include "TimerManager.h"
 #include "GameFramework/Actor.h"
 #include "TowerBase.generated.h"
 
@@ -46,6 +50,7 @@ public:
 	
 
 
+
 };
 
 UCLASS()
@@ -56,17 +61,21 @@ class MYPROJECT_API ATowerBase : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ATowerBase();
+	FTimerHandle MemberTimerHandle;
+
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void SearchForTargets();
-	void _attackTarget(AActor* target);
+
 	void Reload();
 	void ResetAttack();
+	float GetAttackDelay();
+	float GetAttackRange();
+	void AttackTarget(AActor* target);
 
-	FTimerHandle MemberTimerHandle;
 
 private: 
 	bool _canAttack = true;
@@ -85,6 +94,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TowerStats)
 		float Damage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TowerStats)
+		float BaseAttackTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TowerStats)
 		float AttackSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TowerStats)
 		int Projectile;
@@ -95,5 +106,7 @@ public:
 		FAttackStruct AttackEffects;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TowerStats)
 		FLevelupStruct BonusStats;
+
+	TArray<FHitResult> SphereTrace(float size);
 
 };
