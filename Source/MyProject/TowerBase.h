@@ -59,14 +59,16 @@ class MYPROJECT_API ATowerBase : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
-	ATowerBase();
+
+	ATowerBase();	// Sets default values for this actor's properties
+	virtual void BeginPlay() override;	// Called when the game starts or when spawned
+	virtual void Tick(float DeltaTime) override;	// Called every frame
+
+
 	FTimerHandle MemberTimerHandle;
 
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	void SearchForTargets();
 
@@ -80,9 +82,9 @@ protected:
 private: 
 	bool _canAttack = true;
 public:	
-	// Called every frame
 
-	virtual void Tick(float DeltaTime) override;
+
+
 	bool CanAttack() { return _canAttack; }
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TowerStats)
