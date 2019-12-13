@@ -8,6 +8,7 @@
 #include "Engine/EngineTypes.h"
 #include "TimerManager.h"
 #include "GameFramework/Actor.h"
+
 #include "EnemyBase.generated.h"
 /**
  *
@@ -28,29 +29,40 @@ struct FDebuffStrct {
 USTRUCT(BlueprintType)
 struct FStatsStruct {
 	GENERATED_USTRUCT_BODY()
-
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BonusEnemyStats)
 	float bonus_movespeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BonusEnemyStats)
 	float bonus_health;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BonusEnemyStats)
 	float bonus_maxhealth;
 
 };
+
 UCLASS()
 class MYPROJECT_API AEnemyBase : public AActor
 {
 
 	GENERATED_BODY()
 
-protected:
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyStats)
 	float maxhealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyStats)
 	float health;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyStats)
 	float movementspeed;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyStats)
 	int level = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyStats)
 	float experience;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyStats)
 	float totalexpneeded = 86;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyStats)
 	int maxlevel;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyStats)
 	FStatsStruct EnemyStats;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyStats)
 	TArray<FDebuffStrct> debuffs;
 
 
@@ -79,14 +91,16 @@ public:
 	float GetMovementSpeed() { return movementspeed + (EnemyStats.bonus_movespeed * level) - GetMovementSpeedDebuf(); }
 	float GetMaxHealth() { return maxhealth + (EnemyStats.bonus_maxhealth * level); }
 	void Heal(float healamount) { 
-		health + healamount;
+		health += healamount;
 		if (health > GetMaxHealth())
 			health = GetMaxHealth();
 	}
-	void TakeDamage(float damageamount) {
-		health - damageamount; 
+	void _TakeDamage(float damageamount) {
+		health -= damageamount; 
 		if (health < 0)
 			Kill();
+
+		//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Green, FString::Printf(TEXT("Remaining health = %f , damage ammount %f"), health, damageamount));
 	}
 	void Kill()
 	{
@@ -96,12 +110,12 @@ public:
 	}
 	float GetMovementSpeedDebuf() 
 	{ 
-		float DebuffSpeed;
+		float DebuffSpeed = 0.0f;
 		for (auto& hit : debuffs)
 		{
 			if (hit.debuff_movementspeed_enabled)
 			{
-				DebuffSpeed + hit.debuff_movementspeed;
+				DebuffSpeed += hit.debuff_movementspeed;
 			}
 		}
 	return DebuffSpeed;
@@ -134,9 +148,9 @@ public:
 			{
 				Debuff.debuff_damagepersecond_enabled = false;
 			}
-			if (Debuff.debuff_damagepersecond_enabled == false && Debuff.debuff_movementspeed_enabled == false)
+			if (!Debuff.debuff_damagepersecond_enabled && !Debuff.debuff_movementspeed_enabled)
 			{
-				debuffs.Remove(Debuff);
+				debuffs.RemoveAt(i);
 			}
 		}
 	}

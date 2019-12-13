@@ -2,6 +2,7 @@
 
 
 #include "TowerBase.h"
+#include "EnemyBase.h"
 #include <string>
 #include <sstream>
 #include "Runtime/Engine/Public/WorldCollision.h"
@@ -50,10 +51,15 @@ void ATowerBase::SearchForTargets()
 	
 	for (auto& hit : hitResults)
 	{
-		if (hit.GetActor()->GetName().ToLower().Contains("sphere"))
+		if (hit.GetActor()->GetName().ToLower().Contains("enemy"))
 		{
 			Target = hit.GetActor();
 			break;
+		}
+		else
+		{
+			//FString derp = " target = " + hit.GetActor()->GetName();
+			//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(*derp));
 		}
 		
 	}
@@ -68,6 +74,10 @@ void ATowerBase::SearchForTargets()
 
 }
 
+float ATowerBase::GetAttackDamage() {
+	return Damage + (BonusStats.BonusDamage * Level);
+}
+
 TArray<FHitResult> ATowerBase::SphereTrace(float size) {
 	TArray<FHitResult> OutHits;
 
@@ -75,11 +85,9 @@ TArray<FHitResult> ATowerBase::SphereTrace(float size) {
 	FVector SweepEnd = GetActorLocation() + FVector(10,10,10);
 
 	FCollisionShape MyColSphere = FCollisionShape::MakeSphere(size);
-
 	//DrawDebugSphere(GetWorld(), GetActorLocation(), MyColSphere.GetSphereRadius(), 40, FColor::Purple, false, 1);
 	FCollisionQueryParams searchParams;
 	searchParams.AddIgnoredActor(this);
-
 	bool isHit = GetWorld()->SweepMultiByChannel(OutHits, SweepStart, SweepEnd, FQuat::Identity, ECC_WorldStatic, MyColSphere, searchParams);
 
 
@@ -91,8 +99,12 @@ void ATowerBase::AttackTarget(AActor* target)
 {
 	DrawDebugLine(GetWorld(), this->GetActorLocation(), target->GetActorLocation(), FColor::Red, false, 2, 0, 4);
 	_canAttack = false;
-
-	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Green, FString::Printf(TEXT("attack delay = %f"), GetAttackDelay()));
+	if (target->GetName().ToLower().Contains("enemy"))
+	{
+		AEnemyBase* enemy = (AEnemyBase*)target;
+		enemy->_TakeDamage(GetAttackDamage());
+	} 
+	AddExperience(5.0f);
 	/* Send projectile towards target's position */
 	GetWorldTimerManager().SetTimer(MemberTimerHandle, this, &ATowerBase::Reload, 1.0f, true, GetAttackDelay());
 }

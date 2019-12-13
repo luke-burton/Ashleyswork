@@ -68,18 +68,18 @@ public:
 	FTimerHandle MemberTimerHandle;
 
 
-protected:
+
+public:
 
 	void SearchForTargets();
 
 	void Reload();
 	void ResetAttack();
+	float GetAttackDamage();
 	float GetAttackDelay();
 	float GetAttackRange();
 	void AttackTarget(AActor* target);
 
-
-private: 
 	bool _canAttack = true;
 public:	
 
@@ -103,7 +103,8 @@ public:
 		int Projectile;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TowerStats)
 		float Experience;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyStats)
+		float totalexpneeded = 86;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TowerStats)
 		FAttackStruct AttackEffects;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TowerStats)
@@ -111,4 +112,18 @@ public:
 
 	TArray<FHitResult> SphereTrace(float size);
 
+
+	void AddExperience(float XP_toadd)
+	{
+		Experience += XP_toadd;
+		if (Experience >= totalexpneeded)
+		{
+			totalexpneeded += GetNextLevelExperience();
+			Level++;
+		}
+	}
+	float GetNextLevelExperience()
+	{
+		return ((Level)+300 * pow(2, Level / 7.0f));
+	}
 };
